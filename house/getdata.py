@@ -104,8 +104,16 @@ def getRegion():
     region['baoan'] = baoan
     region['longgang'] = longgang
     region['longhua'] = longhua
-
     return region
+
+
+def getRevRegion():
+    region = getRegion()
+    rev = {}
+    for bigRegion in region:
+        for smallRegion in region[bigRegion]:
+            rev[smallRegion] = bigRegion
+    return rev
 
 
 def getHtml(path, code='utf-8'):
