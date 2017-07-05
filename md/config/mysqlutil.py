@@ -20,6 +20,15 @@ class DBUtil:
         self.conn.commit()
         self.conn.close()
 
+
+    def cursor(self):
+        return self.conn.cursor()
+
+
+    def commit(self):
+        self.conn.commit()
+
+
     def exec(self, query, args=None):
         cur = self.conn.cursor()
         cur.execute(query, args)
