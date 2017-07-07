@@ -3,6 +3,7 @@
 from urllib.request import urlopen, Request
 
 from bs4 import BeautifulSoup
+from datetime import datetime
 
 def getHtml(url, code='utf-8'):
     # url = 'http://news.sina.com.cn/china'
@@ -53,9 +54,23 @@ def analyNewContent(data):
     # saveHtml('t2.data', data)
     soup = BeautifulSoup(data, 'html.parser')
 
-    # title = soup.select('#artibodyTitle')[0].text
     title = soup.select('#artibodyTitle')[0].text
     print(title)
+
+    timesource = soup.select('.time-source')[0].contents[0].strip() # 字符串格式
+    dt = datetime.strptime(timesource, '%Y年%m月%d日%H:%M')
+    timesource = dt.strftime('%Y-%m-%d')
+    print(dt)
+    print(timesource)
+
+    source = soup.select('.time-source span')[0].text
+    print(source)
+
+    article = soup.select('#artibody p')[:-1]
+    text = '\n'.join([p.text.strip() for p in article])
+    print(text)
+
+
 
 def getSinaNewsContent(news):
     # print(news)
