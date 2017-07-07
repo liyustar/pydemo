@@ -4,6 +4,8 @@ from urllib.request import urlopen, Request
 
 from bs4 import BeautifulSoup
 from datetime import datetime
+import re
+import json
 
 def getHtml(url, code='utf-8'):
     # url = 'http://news.sina.com.cn/china'
@@ -49,38 +51,48 @@ def getSinaNewsTitle(data):
     return news
 
 
-def analyNewContent(data):
-    # print(data)
-    # saveHtml('t2.data', data)
-    soup = BeautifulSoup(data, 'html.parser')
+def getNewsCommentCount(url):
+    m = re.search('doc-i(.+).shtml', url)
+    newsid = m.group(1)
 
-    title = soup.select('#artibodyTitle')[0].text
-    print(title)
+    commentURL = 'http://comment5.news.sina.com.cn/page/info?' \
+                 'version=1&format=js&channel=gn&newsid=comos-{}' \
+                 '&group=&compress=0&ie=utf-8&oe=utf-8' \
+                 '&page=1&page_size=20'
 
-    timesource = soup.select('.time-source')[0].contents[0].strip() # 字符串格式
-    dt = datetime.strptime(timesource, '%Y年%m月%d日%H:%M')
-    timesource = dt.strftime('%Y-%m-%d')
-    print(dt)
-    print(timesource)
+    jsContent = getHtml(commentURL.format(newsid))
+    # print(jsContent)
 
-    source = soup.select('.time-source span')[0].text
-    print(source)
-
-    article = soup.select('#artibody p')[:-1]
-    text = '\n'.join([p.text.strip() for p in article])
-    print(text)
+    jd = json.loads(jsContent.strip('var data='))
+    commentCount = jd['result']['count']['total']
+    return commentCount
 
 
+def getNewsDetail(url):
+    result = {}
+    html = getHtml(url)
+    soup = BeautifulSoup(html, 'html.parser')
+    result['title'] = soup.select('#artibodyTitle')[0].text
+    result['newssource'] = soup.select('.time-source span a')[0].text
+    timesource = soup.select('.time-source')[0].contents[0].strip()
+    result['dt'] = datetime.strptime(timesource, '%Y年%m月%d日%H:%M')
+    result['article'] = ' '.join([p.text.strip() for p in soup.select('#artibody p')[:-1]])
+    result['editor'] = soup.select('.article-editor')[0].text.strip('责任编辑：')
+    result['comments'] = getNewsCommentCount(url)
+    return result
 
-def getSinaNewsContent(news):
-    # print(news)
-    # for new in news:
-    new = news[0]
-    title = new[1]
-    a = new[2]
-    contentHtml = getHtml(a)
-    print(title, a)
-    analyNewContent(contentHtml)
+def getNewsTitle(page, num):
+    url = 'http://api.roll.news.sina.com.cn/zt_list' \
+          '?channel=news' \
+          '&cat_1=gnxw' \
+          '&cat_2==gdxw1||=gatxw||=zs-pl||=mtjj' \
+          '&level==1||=2&show_ext=1&show_all=1&' \
+          'show_num={}&' \
+          'tag=1&format=json' \
+          '&page={}' \
+          '&callback=newsloadercallback&_=1499439308668'
+    print(url.format(num, page))
+    pass
 
 
 if __name__ == '__main__':
@@ -95,7 +107,10 @@ if __name__ == '__main__':
 
     news = getSinaNewsTitle(html)
 
-    getSinaNewsContent(news)
+    # detail = getNewsDetail(news[0][2])
+    # print(detail)
+
+    getNewsTitle(3, 22)
 
     # print(html)
     pass
