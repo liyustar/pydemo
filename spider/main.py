@@ -7,6 +7,10 @@ from datetime import datetime
 import re
 import json
 
+import pandas
+
+import sqlite3
+
 def getHtml(url, code='utf-8'):
     # url = 'http://news.sina.com.cn/china'
     # user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'
@@ -64,7 +68,10 @@ def getNewsCommentCount(url):
     # print(jsContent)
 
     jd = json.loads(jsContent.strip('var data='))
-    commentCount = jd['result']['count']['total']
+    try:
+        commentCount = jd['result']['count']['total']
+    except:
+        commentCount = -1
     return commentCount
 
 
@@ -73,7 +80,8 @@ def getNewsDetail(url):
     html = getHtml(url)
     soup = BeautifulSoup(html, 'html.parser')
     result['title'] = soup.select('#artibodyTitle')[0].text
-    result['newssource'] = soup.select('.time-source span a')[0].text
+    # result['newssource'] = soup.select('.time-source span a')[0].text
+    result['newssource'] = soup.select('.time-source span')[0].text
     timesource = soup.select('.time-source')[0].contents[0].strip()
     result['dt'] = datetime.strptime(timesource, '%Y年%m月%d日%H:%M')
     result['article'] = ' '.join([p.text.strip() for p in soup.select('#artibody p')[:-1]])
@@ -81,19 +89,33 @@ def getNewsDetail(url):
     result['comments'] = getNewsCommentCount(url)
     return result
 
-def getNewsTitle(page, num):
+def getNewsTitle(page, num=20):
     url = 'http://api.roll.news.sina.com.cn/zt_list' \
           '?channel=news' \
           '&cat_1=gnxw' \
           '&cat_2==gdxw1||=gatxw||=zs-pl||=mtjj' \
-          '&level==1||=2&show_ext=1&show_all=1&' \
-          'show_num={}&' \
-          'tag=1&format=json' \
+          '&level==1||=2&show_ext=1&show_all=1' \
+          '&show_num={}' \
+          '&tag=1&format=json' \
           '&page={}' \
           '&callback=newsloadercallback&_=1499439308668'
     print(url.format(num, page))
-    pass
 
+    jsContent = getHtml(url.format(num, page))
+    jd = json.loads(jsContent.lstrip('  newsloadercallback(').rstrip(');'))
+
+    newsdetails = []
+    for ent in jd['result']['data']:
+        newsdetails.append(getNewsDetail(ent['url']))
+
+    return newsdetails
+
+def getAllTitle(pages, num=20):
+    newsTotal = []
+    for i in range(1, pages+1):
+        newsarray = getNewsTitle(i, num)
+        newsTotal.extend(newsarray)
+    return newsTotal
 
 if __name__ == '__main__':
     url = 'http://news.sina.com.cn/china'
@@ -110,7 +132,20 @@ if __name__ == '__main__':
     # detail = getNewsDetail(news[0][2])
     # print(detail)
 
-    getNewsTitle(3, 22)
+    newsTotal = getAllTitle(1)
+    # print(newsTotal)
+
+    df = pandas.DataFrame(newsTotal)
+    print(df)
+
+    df.to_excel('news.xlsx')
+
+    with sqlite3.connect('news.sqlilte') as db:
+        df.to_sql('news', con = db)
+
+
+
+    # getNewsTitle(3, 22)
 
     # print(html)
     pass
