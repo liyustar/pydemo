@@ -8,8 +8,7 @@ def getFundCompanys(content):
     soup = BeautifulSoup(content, 'html.parser')
 
     list = soup.select('.msDataText')
-    for x in list:
-        print(x)
+    return list
 
 if __name__ == '__main__':
     # url = 'https://cn.morningstar.com/fundcompany/default.aspx'
@@ -20,6 +19,5 @@ if __name__ == '__main__':
     result = getFundCompanys(content)
 
     for item in result:
-        print(item)
-
-
+        if item is not None:
+            print(item)
