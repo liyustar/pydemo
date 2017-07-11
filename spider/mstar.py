@@ -16,8 +16,8 @@ def getFundCompanys(content):
         contents = fund.contents
         # print(contents)
         # fundInfo['id'] = contents[1].text
-        fundInfo['name'] = contents[2].text
         fundInfo['id'] = contents[2].contents[0]['href'].lstrip('/quickrank/default.aspx?company=')
+        fundInfo['name'] = contents[2].text
         fundInfo['city'] = contents[3].text
         fundInfo['setup_time'] = datetime.strptime(contents[4].text, '%Y-%m-%d')
         fundInfo['scale'] = contents[5].text
@@ -40,8 +40,7 @@ if __name__ == '__main__':
     dbutil = mysqlutil.DBUtil()
 
     for item in result:
-        # TODO: bug
-        # dbutil.exec("insert into company(id, name, city, setup_time, scale, fund_num, pm_num, best_fund) values(%s, %s, %s, %s, %s, %s, %s, %s)", [result['id'], result['name'], result['city'], result['setup_time'], result['scale'], result['fund_num'], result['pm_num'], result['best_fund']])
-        print(item)
+        dbutil.exec('insert into company(id, name, city, setup_time, scale, fund_num, pm_num, best_fund) values(%s, %s, %s, %s, %s, %s, %s, %s)',
+            (item['id'], item['name'], item['city'], item['setup_time'], item['scale'], item['fund_num'], item['pm_num'], item['best_fund']))
 
     dbutil.close()
