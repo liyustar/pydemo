@@ -43,7 +43,24 @@ temp_utl = 'http://morningstar.cn/handler/fundranking.ashx?' \
            '&randomid=0.28046837032975325'
 
 
+def analyContent(content):
+    soup = BeautifulSoup(content, 'html.parser')
+    tr_list = soup.select('.fr_tablecontent tr')[:-1]
+    for tr in tr_list:
+        print(tr)
+        fund_id = '?'
+        fund_symbol = tr.select('td')[1].text
+        fund_name = tr.select('a')[0].text
+        print(fund_id, fund_symbol, fund_name)
+        break
+
+
 if __name__ == '__main__':
     # url = 'https://cn.morningstar.com/fundcompany/default.aspx'
-    content = util.getHtml(temp_utl)
-    util.saveHtml('mstar_fund.html', content)
+    # content = util.getHtml(temp_utl)
+    # util.saveHtml('mstar_fund.html', content)
+    
+    content = util.loadHtml('mstar_fund.html')
+    
+    analyContent(content)
+    
