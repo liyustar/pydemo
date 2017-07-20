@@ -2,7 +2,7 @@
 
 from spider import util, mysqlutil
 from bs4 import BeautifulSoup
-from datetime import datetime
+from pandas import DataFrame
 
 # 基金分类
 category = [
@@ -46,14 +46,28 @@ temp_utl = 'http://morningstar.cn/handler/fundranking.ashx?' \
 def analyContent(content):
     soup = BeautifulSoup(content, 'html.parser')
     tr_list = soup.select('.fr_tablecontent tr')[:-1]
-    for tr in tr_list:
-        print(tr)
-        fund_id = '?'
-        fund_symbol = tr.select('td')[1].text
-        fund_name = tr.select('a')[0].text
-        print(fund_id, fund_symbol, fund_name)
-        break
 
+    fundInfoList = []
+    for tr in tr_list:
+        # print(tr)
+        fund = {}
+        fund['id'] = '?'    # TODO: 抓取ID
+        fund['symbol'] = tr.select('td')[1].text
+        fund['name'] = tr.select('a')[0].text
+        fund['wave3'] = tr.select('td')[6].text
+        fund['wave_evaluate3'] = tr.select('td')[7].text
+        fund['risk3'] = tr.select('td')[8].text
+        fund['risk_evaluate3'] = tr.select('td')[9].text
+        fund['sharp3'] = tr.select('td')[10].text
+        fund['sharp_evaluate3'] = tr.select('td')[11].text
+        fund['return'] = tr.select('td')[12].text
+        fund['rank'] = tr.select('td')[13].text
+        # print(fund)
+        fundInfoList.append(fund)
+        # break
+
+    df = DataFrame(fundInfoList)
+    print(df)
 
 if __name__ == '__main__':
     # url = 'https://cn.morningstar.com/fundcompany/default.aspx'
