@@ -2,6 +2,8 @@
 
 from spider import util, mysqlutil
 from bs4 import BeautifulSoup
+import pandas as pd
+import numpy as np
 from pandas import DataFrame
 
 # 基金分类
@@ -43,31 +45,60 @@ temp_utl = 'http://morningstar.cn/handler/fundranking.ashx?' \
            '&randomid=0.28046837032975325'
 
 
+
+def getFundInfo(tr):
+    fund = {}
+    fund['id'] = tr.select('td')[1].contents[0]['fid']
+    fund['symbol'] = tr.select('td')[1].text
+    fund['name'] = tr.select('a')[0].text
+    fund['wave3'] = tr.select('td')[6].text
+    fund['wave_evaluate3'] = tr.select('td')[7].text
+    fund['risk3'] = tr.select('td')[8].text
+    fund['risk_evaluate3'] = tr.select('td')[9].text
+    fund['sharp3'] = tr.select('td')[10].text
+    fund['sharp_evaluate3'] = tr.select('td')[11].text
+    fund['return'] = tr.select('td')[12].text
+    fund['rank'] = tr.select('td')[13].text
+    return fund
+
+
+def calStat(data):
+    try:
+        stat = {}
+        stat['max'] = data.max()
+        stat['min'] = data.min()
+        stat['mean'] = data.mean()
+        stat['median'] = data.median()
+        stat['std'] = data.std()
+        stat['var'] = data.var()
+        return stat
+    except:
+        pass
+    pass
+
+
+def calContentStatistics(df):
+    print(df.columns)
+    rtn = [calStat(df[x]) for x in ['rank','return','risk3','sharp3','wave3']]
+    df_rtn = DataFrame(rtn, index=['rank','return','risk3','sharp3','wave3'])
+    print(df_rtn)
+    pass
+
+
 def analyContent(content):
     soup = BeautifulSoup(content, 'html.parser')
     tr_list = soup.select('.fr_tablecontent tr')[:-1]
 
-    fundInfoList = []
-    for tr in tr_list:
-        # print(tr)
-        fund = {}
-        fund['id'] = '?'    # TODO: 抓取ID
-        fund['symbol'] = tr.select('td')[1].text
-        fund['name'] = tr.select('a')[0].text
-        fund['wave3'] = tr.select('td')[6].text
-        fund['wave_evaluate3'] = tr.select('td')[7].text
-        fund['risk3'] = tr.select('td')[8].text
-        fund['risk_evaluate3'] = tr.select('td')[9].text
-        fund['sharp3'] = tr.select('td')[10].text
-        fund['sharp_evaluate3'] = tr.select('td')[11].text
-        fund['return'] = tr.select('td')[12].text
-        fund['rank'] = tr.select('td')[13].text
-        # print(fund)
-        fundInfoList.append(fund)
-        # break
-
+    fundInfoList = [getFundInfo(tr) for tr in tr_list]
     df = DataFrame(fundInfoList)
-    print(df)
+    df = df.replace('-', np.nan)
+    df[['rank','return','risk3','sharp3','wave3']] = df[['rank','return','risk3','sharp3','wave3']].apply(pd.to_numeric)
+    print(df.head())
+
+    calContentStatistics(df)
+
+    return df
+
 
 if __name__ == '__main__':
     # url = 'https://cn.morningstar.com/fundcompany/default.aspx'
