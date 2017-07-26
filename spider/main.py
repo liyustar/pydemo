@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from bs4 import BeautifulSoup
-from datetime import datetime
-import re
 import json
-import pandas
+import re
 import sqlite3
+from datetime import datetime
 
-from spider import util
+import pandas
+from bs4 import BeautifulSoup
+
+import util
+
 
 def getSinaNewsTitle(data):
     soup = BeautifulSoup(data, 'html.parser')   # html解析器

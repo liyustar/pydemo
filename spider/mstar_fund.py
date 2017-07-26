@@ -1,10 +1,11 @@
 # coding: utf-8
 
-from spider import util, mysqlutil
-from bs4 import BeautifulSoup
-import pandas as pd
 import numpy as np
+import pandas as pd
+from bs4 import BeautifulSoup
 from pandas import DataFrame
+
+import util
 
 # 基金分类
 category = [

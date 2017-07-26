@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from spider import util, mysqlutil
-from bs4 import BeautifulSoup
 from datetime import datetime
+
+from bs4 import BeautifulSoup
+
+import util
+from spider import mysqlutil
 
 
 def getFundCompanys(content):
