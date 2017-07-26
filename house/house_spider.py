@@ -1,8 +1,10 @@
 # coding: utf-8
 
 from house import ref_info
+from bs4 import BeautifulSoup
 
 import util
+import json
 
 
 def getFilename(path, page=None):
@@ -14,6 +16,7 @@ def getFilename(path, page=None):
     return filename
 
 def downloadRegion(regionPath):
+    '''下载一个区域的网页'''
     filename = getFilename(regionPath)
 
     url = 'http://sz.lianjia.com'
@@ -32,8 +35,42 @@ def downloadAllRegions():
         for path in regions[x]:
             downloadRegion(path)
 
+
+def getRegionPageUrls(regionPath):
+    '''获取单个区域的所有页面URL'''
+    # print(regionPath)
+    filename = getFilename(regionPath)
+    html = util.loadHtml(filename)
+
+    soup = BeautifulSoup(html, 'html.parser')
+    pageData = soup.select('.house-lst-page-box')[0]['page-data']
+    jd = json.loads(pageData)
+    return jd['totalPage']
+
+
+def getPageUrls():
+    '''获取所有区域页的url'''
+    regions = ref_info.getRegions()
+    # for x in regions:
+    #     for path in regions[x]:
+    #         pageNum = getRegionPageUrls(path)
+    pageNumList = [(path, getRegionPageUrls(path))
+               for x in regions
+               for path in regions[x]]
+    print(pageNumList)
+    return pageNumList
+
+
+def downloadAllPage(pageUrls):
+    '''下载所有二手房网页'''
+    pass
+
+
 if __name__ == '__main__':
-    downloadAllRegions()
-    # downloadAllPage()
+    # downloadAllRegions()
+    pageUrls = getPageUrls()
+    downloadAllPage(pageUrls)
+    regionPaths, pageNums = zip(*pageUrls)
+    print(sum(pageNums))
     # downloadAllPageByThread()
     pass
