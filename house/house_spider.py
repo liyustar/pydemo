@@ -6,18 +6,12 @@ from bs4 import BeautifulSoup
 import util
 import json
 import time
+import os
 
 LJ_URL = 'http://sz.lianjia.com'
 LJ_HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36',
-              'Cookie': 'lianjia_uuid=10cb6276-ca79-43f9-88d7-eafacc3147b5; select_city=440300;'
-                        ' all-lj=75cfc00b9f12050e3970154c91c12727; sample_traffic_test=controlled_50;'
-                        ' miyue_hide=%20index%20%20index%20%20index%20%20index%20; _gat=1; _gat_global=1;'
-                        ' _gat_new_global=1; _gat_dianpu_agent=1; _smt_uid=57c994b5.41f9c0ed;'
-                        ' CNZZDATA1255849469=2073323734-1472823652-http%253A%252F%252Fwww.lianjia.com%252F%7C1472893938;'
-                        ' CNZZDATA1254525948=1201803747-1472825058-http%253A%252F%252Fwww.lianjia.com%252F%7C1472895258;'
-                        ' CNZZDATA1255633284=65980533-1472826062-http%253A%252F%252Fwww.lianjia.com%252F%7C1472890862;'
-                        ' CNZZDATA1255604082=1245813388-1472823441-http%253A%252F%252Fwww.lianjia.com%252F%7C1472893641;'
-                        ' _ga=GA1.2.1726927867.1472828598; lianjia_ssid=523070a0-a1e5-4a5c-8d47-eb0bbb2c7ead'}
+              'Cookie': 'lianjia_uuid=10cb6276-ca79-43f9-88d7-eafacc3147b5; miyue_hide=%20index%20%20index%20%20index%20%20index%20; _jzqa=1.3615183155870864400.1472963387.1472963387.1472963387.1; _qzja=1.2083497657.1472963386956.1472963386956.1472963386956.1472963386956.1472963386956.0.0.0.1.1; lianjia_token=2.00038ff4927a9338921222dda3221234a2; Hm_lvt_efa595b768cc9dc7d7f9823368e795f1=1477231980; select_city=440300; all-lj=c28812af28ef34a41ba2474a2b5c52c2; UM_distinctid=15d84c8e48c649-0fe2adb9ef30fd-1a346d54-384000-15d84c8e48dd33; CNZZDATA1255849469=1623673338-1501169462-null%7C1501169462; Hm_lvt_9152f8221cb6243a53c83b956842be8a=1501171345; Hm_lpvt_9152f8221cb6243a53c83b956842be8a=1501171345; CNZZDATA1254525948=1923215834-1501169589-null%7C1501169589; CNZZDATA1255633284=556794542-1501169455-null%7C1501169455; CNZZDATA1255604082=638382520-1501170803-null%7C1501170803; _smt_uid=57c994b5.41f9c0ed; _gat=1; _gat_global=1; _gat_new_global=1; _ga=GA1.2.1726927867.1472828598; _gid=GA1.2.712566502.1501171346; _gat_dianpu_agent=1; lianjia_ssid=8a355d57-7162-4fa1-b2a3-b4f06493506d',
+              }
 
 
 def getFilename(path, page=None):
@@ -32,11 +26,16 @@ def getFilename(path, page=None):
 def downloadRegionPage(filename, pagePath):
     '''下载一个区域的网页'''
     url = LJ_URL + pagePath
+    if os.path.exists(filename):
+        print("Have Downloaded.", url)
+        return 1
+
     print("Downloading...", url)
     html = util.getHtml(url, headers=LJ_HEADERS)
     # save saveHtml
     util.saveHtml(filename, html)
     print("Download Done.", url)
+    return 0
 
 
 def downloadAllRegions():
@@ -80,8 +79,9 @@ def getPagePaths():
 def downloadAllPage(pagePaths):
     '''下载所有二手房网页'''
     for filename,pagePath in pagePaths:
-        downloadRegionPage(filename, pagePath)
-        time.sleep(2)   # 要有时间间隔，不然封IP
+        if 1 == downloadRegionPage(filename, pagePath):
+            continue
+        time.sleep(3)   # 要有时间间隔，不然封IP
 
 
 if __name__ == '__main__':
