@@ -13,6 +13,8 @@ LJ_HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) App
               'Cookie': 'lianjia_uuid=10cb6276-ca79-43f9-88d7-eafacc3147b5; miyue_hide=%20index%20%20index%20%20index%20%20index%20; _jzqa=1.3615183155870864400.1472963387.1472963387.1472963387.1; _qzja=1.2083497657.1472963386956.1472963386956.1472963386956.1472963386956.1472963386956.0.0.0.1.1; lianjia_token=2.00038ff4927a9338921222dda3221234a2; Hm_lvt_efa595b768cc9dc7d7f9823368e795f1=1477231980; select_city=440300; all-lj=c28812af28ef34a41ba2474a2b5c52c2; UM_distinctid=15d84c8e48c649-0fe2adb9ef30fd-1a346d54-384000-15d84c8e48dd33; CNZZDATA1255849469=1623673338-1501169462-null%7C1501169462; Hm_lvt_9152f8221cb6243a53c83b956842be8a=1501171345; Hm_lpvt_9152f8221cb6243a53c83b956842be8a=1501171345; CNZZDATA1254525948=1923215834-1501169589-null%7C1501169589; CNZZDATA1255633284=556794542-1501169455-null%7C1501169455; CNZZDATA1255604082=638382520-1501170803-null%7C1501170803; _smt_uid=57c994b5.41f9c0ed; _gat=1; _gat_global=1; _gat_new_global=1; _ga=GA1.2.1726927867.1472828598; _gid=GA1.2.712566502.1501171346; _gat_dianpu_agent=1; lianjia_ssid=8a355d57-7162-4fa1-b2a3-b4f06493506d',
               }
 
+SLEEP_TIME = 5
+
 
 def getFilename(path, page=None):
     filename = path[len('/ershoufang/'):-1]
@@ -81,11 +83,14 @@ def downloadAllPage(pagePaths):
     for filename,pagePath in pagePaths:
         if 1 == downloadRegionPage(filename, pagePath):
             continue
-        time.sleep(3)   # 要有时间间隔，不然封IP
+        time.sleep(SLEEP_TIME)   # 要有时间间隔，不然封IP
 
 
 if __name__ == '__main__':
+    # print('downloadAllRegions')
     # downloadAllRegions()
+
+    print('downloadAllPage')
     pagePaths = getPagePaths()
     downloadAllPage(pagePaths)
     # downloadAllPageByThread()
